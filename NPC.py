@@ -9,6 +9,12 @@ class NPC():
         self.sentiment = 0
         self.rank = "Not Sure"
     
+    def printout(self):
+        print(self.unique_id)
+        print("Connections: ", self.connections)
+        print("Sentiment: ", self.sentiment)
+        print("Rank: ", self.rank)
+
     def getID(self):
         return self.unique_id
 
@@ -33,7 +39,7 @@ class NPC():
         self.connections.add(person_id)
 
     def getConnectionValue(self):
-        if len(self.connections):
+        if len(self.connections) == 0:
             return self.sentiment
 
         total = 0
