@@ -22,7 +22,7 @@ class NPC():
         output = list()
         vals = ['data0Text', 
                 'data1Text', 
-                'data2text', 
+                'data2Text', 
                 'data3Text']
 
         for i in vals:

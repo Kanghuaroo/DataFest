@@ -44,8 +44,8 @@ class Model():
                     #for bidirectional conneciton
                     i.addConnection(unique_id)
                     self.npcs[unique_id].addConnection(i.getID())
-
-    def formSentiment(self):
+    
+    def formASentiment(self, i):
         #TODO add better sentiment analysis
         #check to see how "good" a person is based on 
         #their messages
@@ -56,18 +56,20 @@ class Model():
                 'drunk', 'trashed', 'smoking', 'smoke',
                 'weed', 'alcohol', 'bullying', 'pot',
                 'cigs', 'cigarettes', 'green']
+        msg = i.getData()
+        flag = True
+        for m in msg:
+            for word in bannedWords:
+                if m.find(word) != -1:
+                #say bad word == you bad person
+                    i.setSentiment(0)
+                    flag = False
+        if flag:
+            i.setSentiment(1)
 
+    def formSentiment(self):
         for i in self.npcs:
-            msg = i.getData()
-            flag = True
-            for m in msg:
-                for word in bannedWords:
-                    if m.find(word) == -1:
-                    #say bad word == you bad person
-                        i.setSentiment(0)
-                        flag = False
-            if flag:
-                i.setSentiment(1)
+            self.formASentiment(i)
             
 
     def formRank(self):
