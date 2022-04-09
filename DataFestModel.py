@@ -4,35 +4,35 @@ import numpy as np
 import pandas as pd
 from NPC import *
 
-def buildNPCs(f):
+def buildNPCs(model, f):
     #make this work with all frames
     output = list()
     df = pd.read_excel(f)
 
     for i in range(df.shape[0]):
         #make NPC
-        npc = NPC(df.iloc[i].to_dict())
+        npc = NPC(model, df.iloc[i].to_dict())
         output.append(npc)
 
     return output
 
 
-def buildInvites(f):
+def buildInvites(model, f):
     #make this work with all frames
     output = list()
     df = pd.read_excel(f)
 
     for i in range(df.shape[0]):
         #make Invite
-        invite = Invitation(df.iloc[i].to_dict())
+        invite = Invitation(model, df.iloc[i].to_dict())
         output.append(invite)
 
     return output
 
 class Model():
     def __init__(self, npc_file, invite_file):
-        self.npcs = buildNPCs(npc_file)
-        self.invites = buildInvites(invite_file)
+        self.npcs = buildNPCs(self, npc_file)
+        self.invites = buildInvites(self, invite_file)
 
     def formConnections(self):
         for i in self.npcs:
@@ -73,7 +73,18 @@ class Model():
     def formRank(self):
         #if I am a bad person or know a bad person
         # I am "Bad News"
-        pass
+        connections_weight = 1
+        sentiment_weight = 1
+        threshold = .50
+
+        for i in self.npcs:
+            mean = (i.getConnectionValue() * connections_weight)
+            mean += (i.sentiment * sentiment_weight)
+            mean = mean / 2
+            if mean < threshold:
+                i.rank = "Bad News"
+            else:
+                i.rank = "Best Friend"
 
 def main():
     m = Model("files/NPCGeneration.xlsx", 

@@ -1,5 +1,6 @@
 class NPC():
-    def __init__(self, args):
+    def __init__(self, model, args):
+        self.model = model
         #from dataSheet
         self.unique_id = args.get('id')
         self.args = args
@@ -31,8 +32,21 @@ class NPC():
     def addConnection(self, person_id):
         self.connections.add(person_id)
 
+    def getConnectionValue(self):
+        if len(self.connections):
+            return self.sentiment
+
+        total = 0
+        for i in self.connections:
+            npc_score = self.model.npcs[i].sentiment
+            total = total + npc_score
+        avg = total / len(self.connections)
+        return avg
+
 class Invitation():
-    def __init__(self, args):
+    def __init__(self, model, args):
+        self.model = model
+        #from dataSheet
         self.unique_id = args.get('id')
         self.args = args
 
