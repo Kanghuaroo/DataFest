@@ -4,9 +4,13 @@ class NPC():
         self.unique_id = args.get('id')
         self.args = args
 
-        self.connections = list()
+        self.connections = set()
+        self.sentiment = 0
         self.rank = "Not Sure"
     
+    def getID(self):
+        return self.unique_id
+
     def getData(self):
         output = list()
         vals = ['data0Text', 
@@ -21,8 +25,11 @@ class NPC():
         
         return output
 
-    def addConnections(self, person_id):
-        self.connections.append(person_id)
+    def setSentiment(self, s):
+        self.sentiment = s
+
+    def addConnection(self, person_id):
+        self.connections.add(person_id)
 
 class Invitation():
     def __init__(self, args):
