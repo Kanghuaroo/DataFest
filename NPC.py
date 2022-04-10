@@ -11,7 +11,7 @@ class NPC():
     
     def printout(self):
         print(self.unique_id)
-        print("Connections: ", self.connections)
+        print("Connections: ", self.connections, ", ", self.getConnectionValue())
         print("Sentiment: ", self.sentiment)
         print("Rank: ", self.rank)
 
