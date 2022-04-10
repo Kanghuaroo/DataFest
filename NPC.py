@@ -64,6 +64,19 @@ class Invitation():
         self.unique_id = args.get('id')
         self.args = args
 
+        #connections = who is going
+        self.connections = 0
+        #sentiment = what I feel about the event
+        self.sentiment = 0
+        #answer = am I going? True or False
+        self.answer = False
+
+    def setSentiment(self, s):
+        self.sentiment = s
+
+    def setConnection(self, c):
+        self.connections = c
+
     def getInvolved(self):
         return self.args.get('peopleInvolved')
     

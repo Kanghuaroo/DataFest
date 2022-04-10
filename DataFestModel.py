@@ -38,7 +38,7 @@ class Model():
                 'weed', 'alcohol', 'bullying', 'pot',
                 'cigs', 'cigarettes', 'green']
 
-    def formConnections(self):
+    def npcConnections(self):
         for i in self.npcs:
             msg = i.getData()
             for m in msg:
@@ -49,7 +49,7 @@ class Model():
                     i.addConnection(unique_id)
                     self.npcs[unique_id].addConnection(i.getID())
     
-    def formASentiment(self, i):
+    def npcSingleSentiment(self, i):
         #TODO add better sentiment analysis
         #check to see how "good" a person is based on 
         #their messages
@@ -68,11 +68,11 @@ class Model():
         else:
             i.setSentiment(0)
 
-    def formSentiment(self):
+    def npcSentiment(self):
         for i in self.npcs:
-            self.formASentiment(i)
+            self.npcSingleSentiment(i)
             
-    def formRank(self):
+    def npcRank(self):
         #if I am a bad person or know a bad person
         # I am "Bad News"
         connections_weight = 1
@@ -88,7 +88,10 @@ class Model():
             else:
                 i.rank = 4
     
-    def analyzeInvite(self, invite):
+    def inviteSentiment(self, invite):
+        #TODO again, add better sentiment analysis
+        #currently only checks if a 'bad word' is said
+
         msg = invite.getInvite()
         flag = True
         for word in self.bannedWords:
@@ -100,24 +103,58 @@ class Model():
         else:
             invite.setSentiment(0)
     
-    def analyzeInvites(self):
+    def invitesSentiment(self):
         for i in self.invites:
-            self.analyzeInvite(i)
+            self.inviteSentiment(i)
+
+    def invitesConnections(self):
+        for i in self.invites:
+            self.inviteConnections(i)
+
+    def inviteConnections(self, invite):
+        total = 0
+        people = invite.getInvolved().split(',')
+        for i in people:
+            unique_id = int(i)
+            total += self.npcs[unique_id].rank
+        avg = total / len(people)
+
+        if avg >= 2:
+            #if avg sentiment of people if "Seems OK" or better then go
+            invite.setConnections(1)
+        else:
+            invite.setConnections(0)
+        
+    def inviteAnswer(self):
+        connections_weight = 1
+        sentiment_weight = 1
+        threshold = .5
+
+        for i in self.invites:
+            avg = i.connections * connections_weight
+            avg += i.sentiment * sentiment_weight
+            avg = avg /2
+            if avg < threshold:
+                i.answer = False
+            else:
+                i.answer = True
 
 def main():
     m = Model("files/NPCGeneration.xlsx", 
             "files/InviteGeneration.xlsx")
     #check what friends each person has
-    m.formConnections()
+    m.npcConnections()
     #check data for what person they are
-    m.formSentiment()
+    m.npcSentiment()
     #form an opinion based on Connection & Sentiment
     #can weight each one differently
-    m.formRank()
+    m.npcRank()
 
     #TODO Later
     #Send an Invite through the system
-    m.analyzeInvites():
+    m.inviteSentiment()
+    m.invitesConnections()
+    m.inviteAnswer()
 
     return m
 
