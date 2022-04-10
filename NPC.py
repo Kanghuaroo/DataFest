@@ -71,6 +71,12 @@ class Invitation():
         #answer = am I going? True or False
         self.answer = False
 
+    def printout(self):
+        print(self.unique_id)
+        print("Connections: ", self.connections)
+        print("Sentiment: ", self.sentiment)
+        print("Answer: ", self.answer)
+
     def setSentiment(self, s):
         self.sentiment = s
 

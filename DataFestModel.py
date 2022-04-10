@@ -113,7 +113,9 @@ class Model():
 
     def inviteConnections(self, invite):
         total = 0
-        people = invite.getInvolved().split(',')
+        people = invite.getInvolved()
+        people = str(people)
+        people = people.split(',')
         for i in people:
             unique_id = int(i)
             total += self.npcs[unique_id].rank
@@ -121,9 +123,9 @@ class Model():
 
         if avg >= 2:
             #if avg sentiment of people if "Seems OK" or better then go
-            invite.setConnections(1)
+            invite.setConnection(1)
         else:
-            invite.setConnections(0)
+            invite.setConnection(0)
         
     def inviteAnswer(self):
         connections_weight = 1
@@ -134,10 +136,10 @@ class Model():
             avg = i.connections * connections_weight
             avg += i.sentiment * sentiment_weight
             avg = avg /2
-            if avg < threshold:
-                i.answer = False
-            else:
+            if avg > threshold:
                 i.answer = True
+            else:
+                i.answer = False
 
 def main():
     m = Model("files/NPCGeneration.xlsx", 
@@ -152,7 +154,7 @@ def main():
 
     #TODO Later
     #Send an Invite through the system
-    m.inviteSentiment()
+    m.invitesSentiment()
     m.invitesConnections()
     m.inviteAnswer()
 
