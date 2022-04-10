@@ -4,10 +4,10 @@ import numpy as np
 import pandas as pd
 from NPC import *
 
-def buildNPCs(model, f):
+def buildNPCs(model, f, sheetNum):
     #make this work with all frames
     output = list()
-    df = pd.read_excel(f)
+    df = pd.read_excel(f, sheet_name=sheetNum)
 
     for i in range(df.shape[0]):
         #make NPC
@@ -17,10 +17,10 @@ def buildNPCs(model, f):
     return output
 
 
-def buildInvites(model, f):
+def buildInvites(model, f, sheetNum):
     #make this work with all frames
     output = list()
-    df = pd.read_excel(f)
+    df = pd.read_excel(f, sheet_name=sheetNum)
 
     for i in range(df.shape[0]):
         #make Invite
@@ -30,13 +30,14 @@ def buildInvites(model, f):
     return output
 
 class Model():
-    def __init__(self, npc_file, invite_file):
-        self.npcs = buildNPCs(self, npc_file)
-        self.invites = buildInvites(self, invite_file)
+    def __init__(self, npc_file, invite_file, sheetNum):
+        print("Running level {0} data".format(sheetNum))
+        self.npcs = buildNPCs(self, npc_file, sheetNum)
+        self.invites = buildInvites(self, invite_file, sheetNum)
         self.bannedWords = ["beer", 'drinking', 'wasted',
                 'drunk', 'trashed', 'smoking', 'smoke',
                 'weed', 'alcohol', 'bullying', 'pot',
-                'cigs', 'cigarettes', 'green']
+                'cigs', 'cigarettes', 'green', 'high']
 
     def npcConnections(self):
         for i in self.npcs:
@@ -137,28 +138,49 @@ class Model():
             avg += i.sentiment * sentiment_weight
             avg = avg /2
             if avg > threshold:
-                i.answer = True
+                i.answer = 1
             else:
-                i.answer = False
+                i.answer = 0
+
+    def getInviteAnswers(self):
+        output = list()
+        for invite in self.invites:
+            output.append(invite.answer)
+        return output
+
+    def run(self):
+        #check what friends each person has
+        self.npcConnections()
+        #check data for what person they are
+        self.npcSentiment()
+        #form an opinion based on Connection & Sentiment
+        #can weight each one differently
+        self.npcRank()
+
+        #TODO Later
+        #Send an Invite through the system
+        self.invitesSentiment()
+        self.invitesConnections()
+        self.inviteAnswer()
+
+        return self.getInviteAnswers()
+
+    def checkResults(self):
+        wrongIDs = list()
+        for i in self.invites:
+            flag = i.args.get('safe') == i.answer
+            if not flag:
+                wrongIDs.append(i.unique_id)
+        return len(wrongIDs) == 0, wrongIDs
+
 
 def main():
-    m = Model("files/NPCGeneration.xlsx", 
-            "files/InviteGeneration.xlsx")
-    #check what friends each person has
-    m.npcConnections()
-    #check data for what person they are
-    m.npcSentiment()
-    #form an opinion based on Connection & Sentiment
-    #can weight each one differently
-    m.npcRank()
-
-    #TODO Later
-    #Send an Invite through the system
-    m.invitesSentiment()
-    m.invitesConnections()
-    m.inviteAnswer()
-
-    return m
+    for i in range(10):
+        m = Model("files/NPCGeneration.xlsx", 
+                "files/InviteGeneration.xlsx", i)
+        m.run()
+        ans = m.checkResults()
+        print(ans)
 
 if __name__ == "__main__":
     main()
