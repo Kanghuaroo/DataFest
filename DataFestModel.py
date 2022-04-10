@@ -84,9 +84,9 @@ class Model():
             mean += (i.sentiment * sentiment_weight)
             mean = mean / 2
             if mean < threshold:
-                i.rank = "Bad News"
+                i.rank = 0
             else:
-                i.rank = "Best Friend"
+                i.rank = 4
 
 def main():
     m = Model("files/NPCGeneration.xlsx", 

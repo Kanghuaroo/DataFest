@@ -7,13 +7,13 @@ class NPC():
 
         self.connections = set()
         self.sentiment = 0
-        self.rank = "Not Sure"
+        self.rank = 3
     
     def printout(self):
         print(self.unique_id)
         print("Connections: ", self.connections, ", ", self.getConnectionValue())
         print("Sentiment: ", self.sentiment)
-        print("Rank: ", self.rank)
+        print("Rank: ", self.convertRank())
 
     def getID(self):
         return self.unique_id
@@ -31,6 +31,14 @@ class NPC():
                     output.append(self.args.get(i))
         
         return output
+    
+    def convertRank(self):
+        #index = rank
+        conversion = ["Bad News", 
+                "Not Sure", "Seems OK", 
+                "Good Friends", "Best Friends"]
+
+        return conversion[self.rank]
 
     def setSentiment(self, s):
         self.sentiment = s
