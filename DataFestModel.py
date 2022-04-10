@@ -30,10 +30,19 @@ def buildInvites(model, f, sheetNum):
     return output
 
 class Model():
-    def __init__(self, npc_file, invite_file, sheetNum):
-        print("Running level {0} data".format(sheetNum))
+    def __init__(self, npc_file, invite_file, sheetNum, 
+            npc_params=[1,1,.5], invite_params=[1,1,.5]):
+        #print("Running level {0} data".format(sheetNum))
         self.npcs = buildNPCs(self, npc_file, sheetNum)
         self.invites = buildInvites(self, invite_file, sheetNum)
+        
+        self.npc_connections_weight = npc_params[0]
+        self.npc_sentiment_weight = npc_params[1]
+        self.npc_threshold = npc_params[2]
+
+        self.invite_connections_weight = invite_params[0]
+        self.invite_sentiment_weight = invite_params[1]
+        self.invite_threshold = invite_params[2]
         self.bannedWords = ["beer", 'drinking', 'wasted',
                 'drunk', 'trashed', 'smoking', 'smoke',
                 'weed', 'alcohol', 'bullying', 'pot',
@@ -76,15 +85,11 @@ class Model():
     def npcRank(self):
         #if I am a bad person or know a bad person
         # I am "Bad News"
-        connections_weight = 1
-        sentiment_weight = 1
-        threshold = .50
-
         for i in self.npcs:
-            mean = (i.getConnectionValue() * connections_weight)
-            mean += (i.sentiment * sentiment_weight)
+            mean = (i.getConnectionValue() * self.npc_connections_weight)
+            mean += (i.sentiment * self.npc_sentiment_weight)
             mean = mean / 2
-            if mean < threshold:
+            if mean < self.npc_threshold:
                 i.rank = 0
             else:
                 i.rank = 4
@@ -129,15 +134,11 @@ class Model():
             invite.setConnection(0)
         
     def inviteAnswer(self):
-        connections_weight = 1
-        sentiment_weight = 1
-        threshold = .5
-
         for i in self.invites:
-            avg = i.connections * connections_weight
-            avg += i.sentiment * sentiment_weight
+            avg = i.connections * self.invite_connections_weight
+            avg += i.sentiment * self.invite_sentiment_weight
             avg = avg /2
-            if avg > threshold:
+            if avg > self.invite_threshold:
                 i.answer = 1
             else:
                 i.answer = 0
@@ -171,16 +172,24 @@ class Model():
             flag = i.args.get('safe') == i.answer
             if not flag:
                 wrongIDs.append(i.unique_id)
-        return len(wrongIDs) == 0, wrongIDs
+        return len(wrongIDs) / len(self.invites), wrongIDs
 
 
 def main():
+    batch = list()
     for i in range(10):
         m = Model("files/NPCGeneration.xlsx", 
                 "files/InviteGeneration.xlsx", i)
         m.run()
         ans = m.checkResults()
-        print(ans)
+        batch.append(ans)
+
+    total = 0
+    for i in batch:
+        total += i[0]
+    avg = total / len(batch)
+    print(avg)
+
 
 if __name__ == "__main__":
     main()
