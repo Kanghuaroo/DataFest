@@ -33,6 +33,10 @@ class Model():
     def __init__(self, npc_file, invite_file):
         self.npcs = buildNPCs(self, npc_file)
         self.invites = buildInvites(self, invite_file)
+        self.bannedWords = ["beer", 'drinking', 'wasted',
+                'drunk', 'trashed', 'smoking', 'smoke',
+                'weed', 'alcohol', 'bullying', 'pot',
+                'cigs', 'cigarettes', 'green']
 
     def formConnections(self):
         for i in self.npcs:
@@ -52,26 +56,22 @@ class Model():
         
         #currently only checks to see if banned words are said
 
-        bannedWords = ["beer", 'drinking', 'wasted',
-                'drunk', 'trashed', 'smoking', 'smoke',
-                'weed', 'alcohol', 'bullying', 'pot',
-                'cigs', 'cigarettes', 'green']
         msg = i.getData()
         flag = True
         for m in msg:
-            for word in bannedWords:
+            for word in self.bannedWords:
                 if m.find(word) != -1:
                 #say bad word == you bad person
-                    i.setSentiment(0)
                     flag = False
         if flag:
             i.setSentiment(1)
+        else:
+            i.setSentiment(0)
 
     def formSentiment(self):
         for i in self.npcs:
             self.formASentiment(i)
             
-
     def formRank(self):
         #if I am a bad person or know a bad person
         # I am "Bad News"
@@ -87,6 +87,22 @@ class Model():
                 i.rank = 0
             else:
                 i.rank = 4
+    
+    def analyzeInvite(self, invite):
+        msg = invite.getInvite()
+        flag = True
+        for word in self.bannedWords:
+            if msg.find(word) != -1:
+                #bad word == bad event
+                flag = False
+        if flag:
+            invite.setSentiment(1)
+        else:
+            invite.setSentiment(0)
+    
+    def analyzeInvites(self):
+        for i in self.invites:
+            self.analyzeInvite(i)
 
 def main():
     m = Model("files/NPCGeneration.xlsx", 
@@ -101,6 +117,7 @@ def main():
 
     #TODO Later
     #Send an Invite through the system
+    m.analyzeInvites():
 
     return m
 
